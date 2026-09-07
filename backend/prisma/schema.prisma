@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------
+// Enums
+// ------------------------------------------------------
+
+enum RoleName {
+  TEAM_MEMBER
+  MANAGER
+  ADMIN
+}
+
+enum ReportStatus {
+  DRAFT
+  SUBMITTED
+  NEEDS_CORRECTION
+  APPROVED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TaskStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  BLOCKED
+}
+
+enum TaskType {
+  DEVELOPMENT
+  TESTING
+  MEETING
+  DOCUMENTATION
+  DESIGN
+  RESEARCH
+  OTHER
+}
+
+enum ReviewAction {
+  APPROVED
+  REQUESTED_CHANGES
+}
+
+// ------------------------------------------------------
+// Models
+// ------------------------------------------------------
+
+model Role {
+  id          String   @id @default(uuid())
+  name        RoleName @unique
+  description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users User[]
+
+  @@map("roles")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique @db.VarChar(191)
+  passwordHash String   @db.VarChar(255)
+  fullName     String   @db.VarChar(100)
+  roleId       String
+  avatarUrl    String?  @db.VarChar(255)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  role              Role            @relation(fields: [roleId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  reports           Report[]        @relation("UserReports")
+  submittedVersions ReportVersion[] @relation("UserSubmittedVersions")
+  reviewsGiven      ReviewHistory[] @relation("ReviewerHistories")
+
+  @@index([roleId])
+  @@map("users")
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String   @unique @db.VarChar(100)
+  code        String   @unique @db.VarChar(20)
+  description String?  @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  reports Report[]
+
+  @@map("projects")
+}
+
+model Report {
+  id                   String       @id @default(uuid())
+  userId               String
+  projectId            String
+  weekStartDate        DateTime     @db.Date
+  weekEndDate          DateTime     @db.Date
+  status               ReportStatus @default(DRAFT)
+  currentVersionNumber Int          @default(1)
+  tasksPlannedNextWeek String?      @db.Text
+  blockers             String?      @db.Text
+  isKeyBlocker         Boolean      @default(false)
+  achievements         String?      @db.Text
+  isKeyAchievement     Boolean      @default(false)
+  optionalNotes        String?      @db.Text
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+
+  user            User            @relation("UserReports", fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  project         Project         @relation(fields: [projectId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  tasks           ReportTask[]
+  versions        ReportVersion[]
+  reviewHistories ReviewHistory[]
+
+  @@unique([userId, weekStartDate, projectId], name: "user_week_project_unique")
+  @@index([userId])
+  @@index([projectId])
+  @@index([status])
+  @@index([weekStartDate])
+  @@map("reports")
+}
+
+model ReportTask {
+  id                String       @id @default(uuid())
+  reportId          String
+  name              String       @db.VarChar(255)
+  priority          TaskPriority @default(MEDIUM)
+  taskType          TaskType     @default(DEVELOPMENT)
+  status            TaskStatus   @default(IN_PROGRESS)
+  plannedPercentage Decimal      @default(100.00) @db.Decimal(5, 2)
+  actualPercentage  Decimal      @default(0.00) @db.Decimal(5, 2)
+  plannedHours      Decimal      @default(0.00) @db.Decimal(5, 2)
+  timeSpentHours    Decimal      @default(0.00) @db.Decimal(5, 2)
+  outputDeliverable String?      @db.VarChar(255)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([reportId])
+  @@map("report_tasks")
+}
+
+model ReportVersion {
+  id                 String       @id @default(uuid())
+  reportId           String
+  versionNumber      Int
+  snapshotData       Json
+  statusAtSubmission ReportStatus @default(SUBMITTED)
+  submittedAt        DateTime     @default(now())
+  submittedByUserId  String
+
+  report          Report          @relation(fields: [reportId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  submittedByUser User            @relation("UserSubmittedVersions", fields: [submittedByUserId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  reviews         ReviewHistory[]
+
+  @@unique([reportId, versionNumber])
+  @@index([reportId])
+  @@map("report_versions")
+}
+
+model ReviewHistory {
+  id              String       @id @default(uuid())
+  reportId        String
+  reportVersionId String
+  reviewerId      String
+  action          ReviewAction
+  comment         String?      @db.Text
+  createdAt       DateTime     @default(now())
+
+  report        Report        @relation(fields: [reportId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  reportVersion ReportVersion @relation(fields: [reportVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  reviewer      User          @relation("ReviewerHistories", fields: [reviewerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([reportId])
+  @@index([reportVersionId])
+  @@index([reviewerId])
+  @@map("review_histories")
+}
