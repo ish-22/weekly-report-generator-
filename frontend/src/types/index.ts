@@ -137,6 +137,7 @@ export interface ApiResponse<T> {
     data?: T;
     message?: string;
     errors?: any;
+    meta?: any;
 }
 
 export interface PaginatedData<T> {

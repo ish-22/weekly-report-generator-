@@ -22,7 +22,8 @@ export default function DashboardPage() {
             try {
                 const res = await reportsApi.getMyReports({ limit: 5 });
                 if (res.success && res.data) {
-                    setReports(res.data.items);
+                    const data = Array.isArray(res.data) ? res.data : (res.data as any).items || [];
+                    setReports(data);
                 }
             } catch (err) {
                 console.error('Failed to load reports', err);

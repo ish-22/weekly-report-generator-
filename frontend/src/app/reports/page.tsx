@@ -21,7 +21,14 @@ export default function ReportsHistoryPage() {
         try {
             const res = await reportsApi.getMyReports({ page: p, limit: 10 });
             if (res.success && res.data) {
-                setData(res.data);
+                const isArray = Array.isArray(res.data);
+                setData({
+                    items: isArray ? res.data as any : (res.data as any).items || [],
+                    total: res.meta?.total || 0,
+                    page: res.meta?.page || 1,
+                    limit: res.meta?.limit || 10,
+                    totalPages: res.meta?.totalPages || 1
+                });
             }
         } catch (err) {
             console.error(err);
