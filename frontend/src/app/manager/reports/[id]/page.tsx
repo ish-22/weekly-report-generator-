@@ -120,10 +120,10 @@ export default function ManagerReviewPage() {
                         {report.status === ReportStatus.SUBMITTED && (
                             <div className="flex space-x-3">
                                 <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
-                                    <DialogTrigger>
-                                        <Button variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
-                                            <X className="mr-2 h-4 w-4" /> Request Changes
-                                        </Button>
+                                    <DialogTrigger render={
+                                        <Button variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200" />
+                                    }>
+                                        <X className="mr-2 h-4 w-4" /> Request Changes
                                     </DialogTrigger>
                                     <DialogContent>
                                         <DialogHeader>

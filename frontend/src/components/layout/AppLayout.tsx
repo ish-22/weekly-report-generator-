@@ -47,10 +47,8 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
             <div className="md:hidden flex items-center justify-between p-4 bg-white border-b">
                 <div className="text-xl font-bold text-primary">ReportGen</div>
                 <Sheet>
-                    <SheetTrigger>
-                        <Button variant="outline" size="icon">
-                            <Menu className="h-5 w-5" />
-                        </Button>
+                    <SheetTrigger render={<Button variant="outline" size="icon" />}>
+                        <Menu className="h-5 w-5" />
                     </SheetTrigger>
                     <SheetContent side="left" className="w-64">
                         <div className="mt-8 space-y-4">

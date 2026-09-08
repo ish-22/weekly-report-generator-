@@ -58,10 +58,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         router.push('/login');
     };
 
-    const hasRole = (roles: RoleName[]) => {
+    const hasRole = React.useCallback((roles: RoleName[]) => {
         if (!user || !user.role) return false;
-        return roles.includes(user.role.name);
-    };
+        const userRoleName = typeof user.role === 'string' ? user.role : user.role.name;
+        return roles.includes(userRoleName as RoleName);
+    }, [user]);
 
     return (
         <AuthContext.Provider value={{ user, loading, login, logout, hasRole }}>

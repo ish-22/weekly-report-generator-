@@ -30,7 +30,16 @@ function LoginContent() {
             if (res.success && res.data) {
                 login(res.data.token, res.data.user);
                 toast({ title: 'Welcome back!', description: 'Logged in successfully.' });
-                router.push(redirect);
+                let target = redirect;
+                if (target === '/dashboard') {
+                    const roleStr = (res.data.user.role as any)?.name || res.data.user.role;
+                    if (roleStr === 'ADMIN') {
+                        target = '/admin/users';
+                    } else if (roleStr === 'MANAGER') {
+                        target = '/manager/dashboard';
+                    }
+                }
+                router.push(target);
             }
         } catch (err: any) {
             toast({
