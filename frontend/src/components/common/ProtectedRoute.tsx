@@ -15,15 +15,18 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
     const router = useRouter();
     const pathname = usePathname();
 
+    const hasAccess = allowedRoles ? hasRole(allowedRoles) : true;
+    const allowedRolesStr = allowedRoles?.join(',');
+
     useEffect(() => {
         if (!loading) {
             if (!user) {
                 router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
-            } else if (allowedRoles && !hasRole(allowedRoles)) {
-                router.push('/dashboard');
+            } else if (!hasAccess) {
+                router.push('/');
             }
         }
-    }, [user, loading, allowedRoles, router, pathname, hasRole]);
+    }, [user, loading, allowedRolesStr, router, pathname, hasAccess]);
 
     if (loading) {
         return (

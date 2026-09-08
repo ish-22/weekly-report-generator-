@@ -9,7 +9,14 @@ const app: Application = express();
 // Enable CORS
 app.use(
   cors({
-    origin: env.CORS_ORIGIN,
+    origin: function (origin, callback) {
+      // Allow any localhost port (e.g. 3000 or 3001) or the explicitly configured CORS origin
+      if (!origin || origin.startsWith('http://localhost:') || origin === env.CORS_ORIGIN) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );

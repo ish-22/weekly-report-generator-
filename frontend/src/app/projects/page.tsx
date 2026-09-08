@@ -32,7 +32,7 @@ export default function ProjectsPage() {
     const fetchProjects = async () => {
         setLoading(true);
         try {
-            const res = await projectsApi.getProjects(); // Assuming getProjects returns paginated or all? Let's assume paginated and we map items
+            const res = await projectsApi.getProjects({ includeInactive: 'true' }); // Fetch ALL projects to allow managers to see inactive
             if (res.success && res.data) {
                 setProjects(res.data.items || res.data); // handles both if it's paginated or array
             }

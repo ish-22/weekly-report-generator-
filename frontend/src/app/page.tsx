@@ -11,7 +11,13 @@ export default function Home() {
   useEffect(() => {
     if (!loading) {
       if (user) {
-        router.push('/dashboard');
+        if (user.role?.name === 'ADMIN' || (user as any).role === 'ADMIN') {
+          router.push('/admin/users');
+        } else if (user.role?.name === 'MANAGER' || (user as any).role === 'MANAGER') {
+          router.push('/manager/dashboard');
+        } else {
+          router.push('/dashboard');
+        }
       } else {
         router.push('/login');
       }

@@ -42,10 +42,7 @@ export default function UsersPage() {
 
     const handleRoleChange = async (userId: string, roleName: string) => {
         try {
-            // Typically roles are relations or updated via string mapping
-            // Since backend expects update, we'll try sending roleName or roleId. 
-            // Often backends have an assign role endpoint, we'll use updateUser payload.
-            await usersApi.updateUser(userId, { roleName });
+            await usersApi.updateUserRole(userId, roleName as RoleName);
             toast({ title: 'Role updated' });
             fetchUsers();
         } catch (err: any) {
@@ -56,12 +53,7 @@ export default function UsersPage() {
     const handleDeactivate = async (id: string, currentStatus: boolean) => {
         if (!confirm(`Are you sure you want to ${currentStatus ? 'deactivate' : 'activate'} this user?`)) return;
         try {
-            if (currentStatus) {
-                await usersApi.deactivateUser(id);
-            } else {
-                // If there's an activate endpoint, or we do a PUT
-                await usersApi.updateUser(id, { isActive: true });
-            }
+            await usersApi.updateUserStatus(id, !currentStatus);
             toast({ title: `User ${currentStatus ? 'deactivated' : 'activated'}` });
             fetchUsers();
         } catch (err: any) {

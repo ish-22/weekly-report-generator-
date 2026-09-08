@@ -4,7 +4,8 @@ import { Report, ApiResponse, PaginatedData, ReportVersion } from '@/types';
 export const reportsApi = {
     createDraft: (data: any) => apiClient.post<ApiResponse<Report>>('/reports', data),
     getMyReports: (params?: any) => {
-        const query = new URLSearchParams(params).toString();
+        const cleanParams = Object.fromEntries(Object.entries(params || {}).filter(([_, v]) => v !== undefined));
+        const query = new URLSearchParams(cleanParams as any).toString();
         return apiClient.get<ApiResponse<PaginatedData<Report>>>(`/reports/my-reports${query ? `?${query}` : ''}`);
     },
     getReport: (id: string) => apiClient.get<ApiResponse<Report>>(`/reports/${id}`),
