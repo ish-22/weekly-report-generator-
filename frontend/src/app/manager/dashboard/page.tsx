@@ -35,7 +35,16 @@ export default function ManagerDashboardPage() {
             ]);
 
             if (metricsRes.success) setMetrics(metricsRes.data);
-            if (reportsRes.success) setReports(reportsRes.data as PaginatedData<Report>);
+            if (reportsRes.success) {
+                const isArray = Array.isArray(reportsRes.data);
+                setReports({
+                    items: isArray ? reportsRes.data as any : (reportsRes.data as any).items || [],
+                    total: reportsRes.meta?.total || 0,
+                    page: reportsRes.meta?.page || 1,
+                    limit: reportsRes.meta?.limit || 10,
+                    totalPages: reportsRes.meta?.totalPages || 1
+                });
+            }
             if (projectsRes.success) setProjects(projectsRes.data as Project[]);
         } catch (error) {
             console.error(error);
