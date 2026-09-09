@@ -103,7 +103,9 @@ export const ReportForm = ({ initialData, projects, onSubmitDraft, onSubmitFinal
                                 render={({ field }) => (
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Select a project" />
+                                            <SelectValue placeholder="Select a project">
+                                                {field.value ? projects.find(p => p.id === field.value)?.name : undefined}
+                                            </SelectValue>
                                         </SelectTrigger>
                                         <SelectContent>
                                             {projects.map(p => (
